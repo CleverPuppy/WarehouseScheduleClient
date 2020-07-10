@@ -1,16 +1,18 @@
 <template>
   <div id="app">
-    <SetupWarehouse/>
+    <Index/>
   </div>
 </template>
 
 <script>
-import SetupWarehouse from './components/SetupWarehouse.vue'
+import SetupWarehouse from './components/SetupWarehouse.vue';
+import Index from './components/index';
 
 export default {
   name: 'app',
   components: {
-    SetupWarehouse
+    SetupWarehouse,
+    Index
   },
 }
 </script>

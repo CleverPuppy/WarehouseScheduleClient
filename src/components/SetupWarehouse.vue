@@ -50,19 +50,6 @@
             <template v-if="steps_activate_index == 3">
               <el-container>
                 <el-aside width="200px">
-                  <!-- <el-table :data="form_info.stocks" border stripe>
-                    <el-table-column label="货物种类" prop="name"></el-table-column>
-                    <el-table-column label="可访问性">
-                      <template slot-scope="scope">
-                        <el-tag
-                          type="info"
-                          v-for="index in scope.row.access"
-                          v-bind:key="index"
-                        >{{form_info.robots[index].name}}</el-tag>
-                      </template>
-                    </el-table-column>
-                  </el-table> -->
-
                   <StockList :stockArr="form_info.stocks" :robotArr="form_info.stocks"></StockList>
                 </el-aside>
                 <el-main height>
@@ -132,23 +119,22 @@
                     :robotArr="form_info.robots"
                     @row-change="onStockSelection($event)"></StockList>
                   </template>
-                  <template v-if="steps_activate_index == steps_info.length - 1">
-                      <p>完成了所有的步骤</p>
+                  <template v-if="steps_activate_index == 7">
+                    <p>已完成所有步骤</p>
+                    <el-button type="primary" @click="$emit('done')">回到主页</el-button>
                   </template>
                 </el-aside>
                 <el-container>
                   <el-main height>
-                    <!-- Main content -->
                     <Map :warehouse_info="form_info" v-on:on_drag="map_on_drag($event)" />
                   </el-main>
                 </el-container>
               </el-container>
             </template>
-            <template v-if="steps_activate_index == 5"></template>
             <el-form-item>
-              <el-button v-if="steps_activate_index != steps_info.length - 1" type="primary" @click="onNextStep()">下一步</el-button>
+              <el-button v-if="steps_activate_index < steps_info.length - 1" type="primary" @click="onNextStep()">下一步</el-button>
               <el-button v-if="steps_activate_index == steps_info.length - 1" type="primary" @click="onNextStep()">立即创建</el-button>
-              <el-button>取消</el-button>
+              <el-button v-if="steps_activate_index < steps_info.length">取消</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -177,7 +163,6 @@ const default_steps_info: Array<StepInfo> = [
   { title: "设置地图组件" },
   { title: "机器人放置" },
   { title: "商品放置" },
-  { title: "完成" }
 ];
 enum MapComponent {
   Obs,
@@ -186,9 +171,10 @@ enum MapComponent {
   Blank
 }
 
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue, Emit } from "vue-property-decorator";
 import Map from "./map.vue";
 import StockList from "./stock_list.vue";
+import {create_warehouseInfo} from "../utility/utility";
 
 @Component({
   components: {
@@ -196,7 +182,9 @@ import StockList from "./stock_list.vue";
     StockList
   }
 })
+
 export default class SetupWarehouse extends Vue {
+  @Prop({type: Array,default: () =>default_steps_info}) steps_info!: Array<StepInfo>;
   steps_activate_index: number = 0;
   form_info: WarehouseInfoForm = new WarehouseInfoForm();
   form_robot: iRobot = { name: "" };
@@ -208,16 +196,9 @@ export default class SetupWarehouse extends Vue {
     { label: "清空区块", id: MapComponent["Blank"] }
   ];
   map_component_selection: number = -1; // 默认未选择
-
   current_select_stock_access : number[] = []; //默认无 
 
-  @Prop({
-    type: Array,
-    default: () => {
-      return default_steps_info;
-    }
-  })
-  steps_info!: Array<StepInfo>;
+
 
   add_robot(): void {
     console.log("add_robot");
@@ -265,9 +246,20 @@ export default class SetupWarehouse extends Vue {
 
     if (validation) {
       this.steps_activate_index = Math.min(
-        default_steps_info.length - 1,
+        default_steps_info.length,
         this.steps_activate_index + 1
       );
+
+      if(this.steps_activate_index == default_steps_info.length) {
+        // last step , create a db
+        create_warehouseInfo(this.form_info)
+          .then(val=>{
+            console.log("create_warehouseinfo, success : ", val);
+          })
+          .catch(err=>{
+            console.error("create_warehouseInfo failed , err: ", err);
+          })
+      }
     }
   }
 
@@ -347,5 +339,7 @@ export default class SetupWarehouse extends Vue {
         this.current_select_stock_access = val.access;
       } 
   }
+
+
 }
 </script>
