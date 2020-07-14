@@ -121,7 +121,7 @@
                   </template>
                   <template v-if="steps_activate_index == 7">
                     <p>已完成所有步骤</p>
-                    <el-button type="primary" @click="$emit('done')">回到主页</el-button>
+                    <el-button type="primary" @click="onDone()">回到主页</el-button>
                   </template>
                 </el-aside>
                 <el-container>
@@ -185,6 +185,8 @@ import {create_warehouseInfo} from "../utility/utility";
 
 export default class SetupWarehouse extends Vue {
   @Prop({type: Array,default: () =>default_steps_info}) steps_info!: Array<StepInfo>;
+  @Prop({type: String}) user_id !: string;
+
   steps_activate_index: number = 0;
   form_info: WarehouseInfoForm = new WarehouseInfoForm();
   form_robot: iRobot = { name: "" };
@@ -340,6 +342,9 @@ export default class SetupWarehouse extends Vue {
       } 
   }
 
+  @Emit() onDone() : any {
+    return this.form_info;
+  }
 
 }
 </script>
