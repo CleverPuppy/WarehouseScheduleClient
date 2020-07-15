@@ -9,6 +9,7 @@
   "dependencies": {
     "axios": "^0.19.2",
     "element-ui": "^2.4.5",
+    "konva": "^7.0.3",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
     "vue-konva": "^2.1.3",

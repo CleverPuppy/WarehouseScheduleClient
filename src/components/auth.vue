@@ -24,18 +24,6 @@
 <script lang="ts">
 import { Vue, Prop, Component, Emit } from "vue-property-decorator";
 
-export interface iUserInfo {
-    user_name : string,
-    user_pwd : string,
-    user_id ?: string,
-    warehouse_info_id ?: string
-}
-
-export interface iAuthForm {
-    user_name : string,
-    user_pwd : string
-};
-
 @Component
 export default class Auth extends Vue {
     auth_form : iAuthForm = {user_name:"",user_pwd:""};

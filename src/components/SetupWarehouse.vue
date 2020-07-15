@@ -149,7 +149,6 @@ export class WarehouseInfoForm implements iWarehouseInfo {
   block_height: number = 20;
   robots: Array<iRobot> = [{ name: "default" }];
   stocks: Array<iStock> = [{ name: "default", access: [0] }];
-
   obsArray: Array<iObstacle> = [];
   rackArray: Array<iRack> = [];
   depotArray: Array<iDepot> = [];
@@ -174,7 +173,6 @@ enum MapComponent {
 import { Component, Prop, Vue, Emit } from "vue-property-decorator";
 import Map from "./map.vue";
 import StockList from "./stock_list.vue";
-import {create_warehouseInfo} from "../utility/utility";
 
 @Component({
   components: {
@@ -185,7 +183,6 @@ import {create_warehouseInfo} from "../utility/utility";
 
 export default class SetupWarehouse extends Vue {
   @Prop({type: Array,default: () =>default_steps_info}) steps_info!: Array<StepInfo>;
-  @Prop({type: String}) user_id !: string;
 
   steps_activate_index: number = 0;
   form_info: WarehouseInfoForm = new WarehouseInfoForm();
@@ -254,13 +251,8 @@ export default class SetupWarehouse extends Vue {
 
       if(this.steps_activate_index == default_steps_info.length) {
         // last step , create a db
-        create_warehouseInfo(this.form_info)
-          .then(val=>{
-            console.log("create_warehouseinfo, success : ", val);
-          })
-          .catch(err=>{
-            console.error("create_warehouseInfo failed , err: ", err);
-          })
+        console.log('last step, emit ondone');
+        this.onDone();
       }
     }
   }

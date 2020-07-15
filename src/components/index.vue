@@ -13,7 +13,7 @@
             </el-col>
             <el-col :span="22">
                 <template v-if="current_nav_index == 1" >
-                    <SetupWarehouse @on_done="current_nav_index = 0"/>
+                    <SetupWarehouse @on-done="createWarehouseInfo($event)"/>
                 </template>
             </el-col>
         </el-row>
@@ -23,8 +23,11 @@
 <script lang="ts">
 import { Vue, Prop, Component, Emit } from "vue-property-decorator";
 import SetupWarehouse, { WarehouseInfoForm } from '../components/SetupWarehouse.vue';
-import {retrieve_warehouseInfo, auth_userInfo, create_userInfo} from "../utility/utility";
-import Auth ,{iAuthForm} from "./auth.vue";
+import {retrieve_warehouseInfo, 
+        retrieve_warehouseInfo_by_user_id,auth_userInfo, 
+        create_userInfo,
+        create_warehouseInfo} from "../utility/utility";
+import Auth from "./auth.vue";
 
 interface iMenuItem {
     name : string
@@ -47,6 +50,7 @@ export default class Index extends Vue{
     current_nav_index : number = 0;
     warehouseInfo : any = {};
     user_id :string =  "";
+    warehouseInfo_id: string = "";
 
 
     isAuthed() : boolean {
@@ -79,6 +83,24 @@ export default class Index extends Vue{
         auth_userInfo(user_info)
             .then(value=>{
                 this.user_id = value.data.user_id;
+                if(this.user_id != ''){
+                    retrieve_warehouseInfo_by_user_id(this.user_id)
+                    .then(value => {
+                        console.log("retrieve_warehouseInfo_by_user_id", value);
+                        if(value.data.length > 0 ){
+                            // 存在仓库
+                            this.warehouseInfo = value.data[0];
+                            this.warehouseInfo_id = value.data[0]._id;
+                        }else{
+                            // TODO ADD REDIRECT LOGIC
+                            this.current_nav_index = 1; 
+                            console.log('不存在仓库，转到设置去创建仓库');
+                        }
+                    })
+                    .catch(err => {
+                        console.log("[error] retrieve_warehouseInfo_by_user_id", err);
+                    })
+                }
                 console.log(value);
             })
             .catch(err =>{
@@ -94,6 +116,21 @@ export default class Index extends Vue{
             .catch(err => {
                 console.log(err);
             })
+    }
+
+    createWarehouseInfo(warehouse_info: WarehouseInfoForm) : void {
+        this.warehouseInfo = warehouse_info;
+        if(this.user_id && this.user_id != ''){
+            create_warehouseInfo({...this.warehouseInfo, user_id:this.user_id})
+                .then(value => {
+                    console.log('create warehouse info, success : ',value);
+                })
+                .catch(err => {
+                    console.log('create warehouse info , failed :', err);
+                })
+        }else {
+            console.log('未登陆');
+        }   
     }
 }
 

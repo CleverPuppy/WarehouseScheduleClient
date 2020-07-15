@@ -51,3 +51,15 @@ interface iDragArea{
     x2: number,
     y2: number
 }
+
+interface iUserInfo {
+    user_name : string,
+    user_pwd : string,
+    user_id ?: string,
+    warehouse_info_id ?: string
+}
+
+interface iAuthForm {
+    user_name : string,
+    user_pwd : string
+}
